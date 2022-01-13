@@ -1,0 +1,7 @@
+beautifulsoup4
+camelot-py[cv]
+lxml
+pendulum
+pylightxl
+requests
+thefuzz[speedup]
