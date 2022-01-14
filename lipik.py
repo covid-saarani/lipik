@@ -157,7 +157,7 @@ del pretty["internal"]
 # Save the data in JSON, and make "latest.json" symlink point to it.
 
 Path(f"../saarani/Daily/{yesterday.format('YYYY_MM_DD')}.json").write_text(
-    json.dumps(pretty)
+    json.dumps(pretty, indent=4)
 )
 
 latest = Path("../saarani/latest.json")
@@ -195,7 +195,7 @@ for state in pretty.keys():
     })
 
 # Save dashboard in "dashboard.json".
-Path("../saarani/dashboard.json").write_text(json.dumps(dashboard))
+Path("../saarani/dashboard.json").write_text(json.dumps(dashboard, indent=4))
 
 
 # End of file.
