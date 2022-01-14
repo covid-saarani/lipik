@@ -23,7 +23,7 @@
 def district_name_fixer(district, state) -> str:
     """Fix / Change district names."""
 
-    change_names = {  # For old/long/short -> new name map.
+    change_names = {  # For typos/old/long/short -> new name map.
         "Kawardha": "Kabeerdham",
         "BBMP": "Bengaluru Urban",
         "Sri Potti Sriramulu Nellore": "S.P.S. Nellore",
@@ -38,11 +38,16 @@ def district_name_fixer(district, state) -> str:
         "Sivakasi": "Virudhunagar",
         "Tuticorin": "Thoothukkudi",
         "Dibang Valley": "Upper Dibang Valley",
-        # "Kamrup Metro": "Kamrup Metropolitan",
+        "Kamrup Metro": "Kamrup Metropolitan",
         "Baleshwar": "Balasore",
         "East Nimar": "Khandwa",
         "Sonepur": "Subarnapur",
-        "Korea": "Koriya"
+        "Korea": "Koriya",
+        "Diamond Harbor HD (S 24 Parganas)": "South 24 Parganas",
+        "Nandigram HD (Purba Medinipore)": "Purba Medinipur",
+        "Shahid Bhagat Singh Nagar": "SBS Nagar",
+        "Dohad": "Dahod",
+        "Agar": "Agar Malwa",
     }
 
     if district in change_names:

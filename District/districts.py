@@ -78,7 +78,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
             state = find_name(data["state_name"], pretty_states_tuple)
 
         state_districts_dict = pretty[state]["districts"]
-        state_district_names = set(state_district_map[pretty[state]["abbr"]])
+        state_district_names = state_district_map[pretty[state]["abbr"]]
 
         district = district_name_fixer(data["district_name"], state)
 
@@ -86,7 +86,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
             state_districts_dict[district] = copy.deepcopy(district_struct)
             state_district_map[pretty[state]["abbr"]].append(district)
 
-        elif district not in state_district_names:
+        elif district not in set(state_district_names):
             district = find_name(district, tuple(state_district_names))
 
         # Now set the number of centres.
