@@ -48,6 +48,7 @@ def fill_cases(
     # 0th is A&N Islands. Check total cases, it cannot decrease with time.
     if mygov["Total Confirmed cases"]["0"] < mohfw[0]["new_positive"]:
         # MyGov data is outdated compared to the MoHFW one.
+        print("Using MoHFW data.")
         pretty["internal"]["use_mygov"] = False
         parse_mygov(pretty, mygov, yesterday, fill_data=False)
         parse_mohfw(pretty, mohfw, yesterday)
@@ -55,6 +56,7 @@ def fill_cases(
 
     # else:
     # Parse MyGov data, and add reconciled death data from MoHFW data.
+    print("Using MyGov data.")
     parse_mygov(pretty, mygov, yesterday)
     parse_mohfw(pretty, mohfw, yesterday, reconciliation_only=True)
 # End of fill_cases().

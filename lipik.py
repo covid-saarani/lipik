@@ -79,27 +79,27 @@ pretty["All"] = {
     "confirmed": {
         "current": 0,     # As on the previous day of logging (say, 100).
         "previous": 0,    # As on the day before yesterday day (say, 70).
-        "new": 0,       # New cases (for the examples above, 30).
+        "delta": 0,       # Change in cases (for the examples above, +30).
     },
 
     "active": {
         "current": 0,
         "previous": 0,
-        "new": 0,
+        "delta": 0,
         "ratio_pc": 0
     },
 
     "recovered": {
         "current": 0,
         "previous": 0,
-        "new": 0,
+        "delta": 0,
         "ratio_pc": 0
     },
 
     "deaths": {
         "current": 0,
         "previous": 0,
-        "new": 0,
+        "delta": 0,
         "reconciled": 0,
         "ratio_pc": 0
     },
@@ -179,16 +179,16 @@ for state in pretty.keys():
         "State": "All over India" if state == "All" else state,
 
         "Active (Total)": pretty[state]["active"]["current"],
-        "Active (New)": pretty[state]["active"]["new"],
+        "Active (Change)": pretty[state]["active"]["delta"],
 
         "Recovered (Total)": pretty[state]["recovered"]["current"],
-        "Recovered (New)": pretty[state]["recovered"]["new"],
+        "Recovered (Change)": pretty[state]["recovered"]["delta"],
 
         "Deaths (Total)": pretty[state]["deaths"]["current"],
-        "Deaths (New)": pretty[state]["deaths"]["new"],
+        "Deaths (Change)": pretty[state]["deaths"]["delta"],
 
         "Overall (Total)": pretty[state]["confirmed"]["current"],
-        "Overall (New)": pretty[state]["confirmed"]["new"],
+        "Overall (Change)": pretty[state]["confirmed"]["delta"],
 
         "Vaccinations (Total)": vaccination_all["total"],
         "Vaccinations (New)": vaccination_all["new"],

@@ -65,22 +65,22 @@ def parse_mohfw(
         state_confirmed = pretty[state]["confirmed"]
         confirmed = int(data["new_positive"] or 0)
         prev_confirmed = int(data["positive"] or 0)
-        new_confirmed = confirmed - prev_confirmed
+        delta_confirmed = confirmed - prev_confirmed
 
         state_confirmed["current"] = confirmed
         state_confirmed["previous"] = prev_confirmed
-        state_confirmed["new"] = new_confirmed
+        state_confirmed["delta"] = delta_confirmed
 
         # Active cases:
 
         state_active = pretty[state]["active"]
         active = int(data["new_active"] or 0)
         prev_active = int(data["active"] or 0)
-        new_active = active - prev_active
+        delta_active = active - prev_active
 
         state_active["current"] = active
         state_active["previous"] = prev_active
-        state_active["new"] = new_active
+        state_active["delta"] = delta_active
         state_active["ratio_pc"] = round((100 * active) / confirmed, 5)
 
         # Recovered cases:
@@ -88,11 +88,11 @@ def parse_mohfw(
         state_recovered = pretty[state]["recovered"]
         recovered = int(data["new_cured"] or 0)
         prev_recovered = int(data["cured"] or 0)
-        new_recovered = recovered - prev_recovered
+        delta_recovered = recovered - prev_recovered
 
         state_recovered["current"] = recovered
         state_recovered["previous"] = prev_recovered
-        state_recovered["new"] = new_recovered
+        state_recovered["delta"] = delta_recovered
         state_recovered["ratio_pc"] = round((100 * recovered) / confirmed, 5)
 
         # Deaths:
@@ -100,11 +100,11 @@ def parse_mohfw(
         state_deaths = pretty[state]["deaths"]
         deaths = int(data["new_death"] or 0)
         prev_deaths = int(data["death"] or 0)
-        new_deaths = int(data["total"] or 0)
+        delta_deaths = int(data["total"] or 0)
 
         state_deaths["current"] = deaths
         state_deaths["previous"] = prev_deaths
-        state_deaths["new"] = new_deaths
+        state_deaths["delta"] = delta_deaths
         state_deaths["ratio_pc"] = round((100 * deaths) / confirmed, 5)
     # End of for loop.
 

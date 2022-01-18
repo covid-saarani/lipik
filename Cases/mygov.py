@@ -90,7 +90,7 @@ def parse_mygov(
             state,
             confirmed, active, recovered, deaths,
             prev_confirmed, prev_active, prev_recovered, prev_deaths,
-            new_confirmed, new_active, new_recovered, new_deaths
+            delta_confirmed, delta_active, delta_recovered, delta_deaths
         ) in zip(
             state_names,
 
@@ -115,43 +115,43 @@ def parse_mygov(
         state_confirmed = pretty[state]["confirmed"]
         state_confirmed["current"] = confirmed
         state_confirmed["previous"] = prev_confirmed
-        state_confirmed["new"] = new_confirmed
+        state_confirmed["delta"] = delta_confirmed
 
         state_active = pretty[state]["active"]
         state_active["current"] = active
         state_active["previous"] = prev_active
-        state_active["new"] = new_active
+        state_active["delta"] = delta_active
         state_active["ratio_pc"] = round((100 * active) / confirmed, 5)
 
         state_recovered = pretty[state]["recovered"]
         state_recovered["current"] = recovered
         state_recovered["previous"] = prev_recovered
-        state_recovered["new"] = new_recovered
+        state_recovered["delta"] = delta_recovered
         state_recovered["ratio_pc"] = round((100 * recovered) / confirmed, 5)
 
         state_deaths = pretty[state]["deaths"]
         state_deaths["current"] = deaths
         state_deaths["previous"] = prev_deaths
-        state_deaths["new"] = new_deaths
+        state_deaths["delta"] = delta_deaths
         state_deaths["ratio_pc"] = round((100 * deaths) / confirmed, 5)
 
         # Add to the total national count.
 
         national_confirmed["current"] += confirmed
         national_confirmed["previous"] += prev_confirmed
-        national_confirmed["new"] += new_confirmed
+        national_confirmed["delta"] += delta_confirmed
 
         national_active["current"] += active
         national_active["previous"] += prev_active
-        national_active["new"] += new_active
+        national_active["delta"] += delta_active
 
         national_recovered["current"] += recovered
         national_recovered["previous"] += prev_recovered
-        national_recovered["new"] += new_recovered
+        national_recovered["delta"] += delta_recovered
 
         national_deaths["current"] += deaths
         national_deaths["previous"] += prev_deaths
-        national_deaths["new"] += new_deaths
+        national_deaths["delta"] += delta_deaths
     # End of for loop.
 
     # Calculate ratios for the total national counts, with precision of 5.
