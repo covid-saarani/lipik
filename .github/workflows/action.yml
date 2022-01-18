@@ -32,8 +32,10 @@ on:
 
   push:  # Whenever we update code in the main branch, or this action file.
     branches:
-      - main/**.py
-      - main/.github/workflows/action.yml
+      - main
+    paths:
+      - "**.py"
+      - ".github/workflows/action.yml"
 # End of on.
 
 jobs:
