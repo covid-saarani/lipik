@@ -177,18 +177,40 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
 
     # If we added multiple times, we need to average out the percentages.
     for state in pretty_states_set:
-        state_districts_dict = pretty[state]["districts"]
+        for district in (districts := pretty[state]["districts"]):
+            dist_dict = districts[district]
 
-        for district in state_districts_dict:
             # Divide if > 1 (already summed up).
-            if (num := state_districts_dict[district]["iteration"]) > 1:
-                state_districts_dict[district]["rat_pc"] /= num
-                state_districts_dict[district]["rtpcr_pc"] /= num
-                state_districts_dict[district]["positivity_rate"] /= num
+            if (num := districts[district]["iteration"]) > 1:
+                dist_dict["rat_pc"] = round((dist_dict["rat_pc"] / num), 5)
+                dist_dict["rtpcr_pc"] = round((dist_dict["rtpcr_pc"] / num), 5)
+                dist_dict["positivity_rate"] = round(
+                    (dist_dict["positivity_rate"] / num), 5
+                )
 
             # Delete the field.
-            del state_districts_dict[district]["iteration"]
+            del dist_dict["iteration"]
 
+    # Now we will set aggregate national stats.
+
+    natl = copy.deepcopy(district_struct)
+
+    for state in pretty_states_set:
+        for district in (districts := pretty[state]["districts"]):
+            natl["centers"] += districts[district]["centers"]
+            natl["rat_pc"] += districts[district]["rat_pc"]
+            natl["rtpcr_pc"] += districts[district]["rtpcr_pc"]
+            natl["positivity_rate"] += districts[district]["positivity_rate"]
+            natl["iteration"] += 1
+
+    num = natl["iteration"]
+    del natl["iteration"]
+
+    natl["rat_pc"] = round((natl["rat_pc"] / num), 5)
+    natl["rtpcr_pc"] = round((natl["rtpcr_pc"] / num), 5)
+    natl["positivity_rate"] = round((natl["positivity_rate"] / num), 5)
+
+    pretty["All"]["districts"]["Aggregate"] = natl
 # End of fill_district_data()
 
 
