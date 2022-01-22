@@ -113,7 +113,7 @@ def fill_mohfw_data(
     pdf.write(requests.get(pretty["internal"]["mohfw_vaccination"]).content)
 
     # Parse the table from the pdf. Linux needed for using an open file.
-    tables = camelot.read_pdf(pdf.name)
+    tables = camelot.read_pdf(pdf.name, backend="poppler")
     pdf.close()  # We no longer need it. Also will delete the same.
 
     # Make sure we have tables parsed in the expected format.
@@ -144,6 +144,7 @@ def fill_mohfw_data(
         or national_table[3][3].count("\n") != 0  # Number of ^.
         or national_table[3][4].count("\n") != 1  # Last 24 hours stat.
     ):
+        print(national_table)  # For logging in CI.
         raise InvalidPdfException("National vaccination stats "
                                   "not parsed correctly.")
 
@@ -257,7 +258,7 @@ def fill_mohfw_data(
                                              - old_15["3rd_dose"]["total"])
 
     # Now set all_doses, as well as all_ages data.
-    for state in pretty_states_set:
+    for state in (pretty_states_set | {"All"}):
         set_all_ages_doses(pretty[state]["vaccination"])
 # End of fill_mohfw_data()
 

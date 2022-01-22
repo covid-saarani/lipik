@@ -1,5 +1,5 @@
 beautifulsoup4
-camelot-py[cv]
+camelot-py[base]
 lxml
 pendulum
 pylightxl
