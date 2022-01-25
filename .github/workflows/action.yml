@@ -77,9 +77,9 @@ jobs:
         id: cache-venv
         with:
           path: ~/venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-venv-${{ secrets.SOME_TIMESTAMP }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-venv-
+            ${{ runner.os }}-venv-${{ secrets.SOME_TIMESTAMP }}-
 
       - name: Make virtual environment
         if: steps.cache-venv.outputs.cache-hit != 'true'
