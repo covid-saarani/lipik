@@ -140,9 +140,18 @@ pretty["Miscellaneous"]["helpline"] = ""
 pretty["Miscellaneous"]["donate"] = ""
 
 
-# Yesterday and day before yesterday.
-yesterday = pendulum.yesterday("Asia/Kolkata")
+# Set yesterday and day before yesterday.
+
+now = pendulum.now("Asia/Kolkata")
+
+# Stats come after 0830 IST for the prev day (we fetch hourly).
+if now.hour < 8 or (now.hour == 8 and now.minute < 30):
+    yesterday = now.subtract(days=2)
+else:
+    yesterday = now.subtract(days=1)
+
 day_before_yesterday = yesterday.subtract(days=1)
+
 
 # Fill the dictionary.
 fill_cases(pretty, yesterday)

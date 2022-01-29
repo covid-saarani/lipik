@@ -130,25 +130,30 @@ def fill_mohfw_data(
 
     if (
         len(national_table) != 5
-        or len(national_table.columns) != 5
+        or len(national_table.columns) != 6
 
-        or national_table[1][2].count("\n") != 1  # 1st dose\n2nd dose.
-        or national_table[1][3].count("\n") != 1  # Numbers of doses.
-        or national_table[1][4].count("\n") != 3  # Last 24 hours stat.
+        or national_table[1][2].count("\n") != 0  # 1st dose.
+        or national_table[1][3].count("\n") != 0  # Numbers of doses.
+        or national_table[1][4].count("\n") != 1  # Last 24 hours stat.
 
-        or national_table[2][2].count("\n") != 0  # 15-18's 1st dose.
-        or national_table[2][3].count("\n") != 0  # Number of ^.
+        or national_table[2][2].count("\n") != 0  # 2nd dose.
+        or national_table[2][3].count("\n") != 0  # Numbers of doses.
         or national_table[2][4].count("\n") != 1  # Last 24 hours stat.
 
-        or national_table[3][2]  # If Empty string. | Precaution dose.
+        or national_table[3][2].count("\n") != 0  # 15-18's 1st dose.
         or national_table[3][3].count("\n") != 0  # Number of ^.
         or national_table[3][4].count("\n") != 1  # Last 24 hours stat.
+
+        or national_table[4][1] != "Precaution Dose"
+        or national_table[4][3].count("\n") != 0  # Number of doses.
+        or national_table[4][4].count("\n") != 1  # Last 24 hours stat.
     ):
-        print(national_table)  # For logging in CI.
+        print(national_table.to_string())  # For logging in CI.
         raise InvalidPdfException("National vaccination stats "
                                   "not parsed correctly.")
 
     if len(states_table) != 41 or len(states_table.columns) != 7:
+        print(states_table.to_string())  # For logging in CI.
         raise InvalidPdfException("State-wise vaccination stats "
                                   "not parsed correctly.")
 
@@ -164,26 +169,25 @@ def fill_mohfw_data(
     national_18 = pretty["All"]["vaccination"]["18+"]
     national_15 = pretty["All"]["vaccination"]["15-18"]
 
-    # For 18+ first and second doses:
-
-    total = national_table[1][3].split("\n")
+    # For 18+ first doses:
     new = national_table[1][4].split("\n")
-
-    national_18["1st_dose"]["total"] = locale.atoi(total[0])
+    national_18["1st_dose"]["total"] = locale.atoi(national_table[1][3])
     national_18["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
 
-    national_18["2nd_dose"]["total"] = locale.atoi(total[1])
-    national_18["2nd_dose"]["new"] = locale.atoi(new[1].split()[0][1:])
+    # For 18+ second doses:
+    new = national_table[2][4].split("\n")
+    national_18["2nd_dose"]["total"] = locale.atoi(national_table[2][3])
+    national_18["2nd_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
 
     # For 18+ precaution dose:
-    national_18["3rd_dose"]["total"] = locale.atoi(national_table[3][3])
+    national_18["3rd_dose"]["total"] = locale.atoi(national_table[4][3])
     national_18["3rd_dose"]["new"] = locale.atoi(
-                                        national_table[3][4].split()[0][1:])
+                                        national_table[4][4].split()[0][1:])
 
     # For 15-18 1st dose:
-    national_15["1st_dose"]["total"] = locale.atoi(national_table[2][3])
+    national_15["1st_dose"]["total"] = locale.atoi(national_table[3][3])
     national_15["1st_dose"]["new"] = locale.atoi(
-                                        national_table[2][4].split()[0][1:])
+                                        national_table[3][4].split()[0][1:])
 
     # Total vaccination for all ages will be set later.
 
