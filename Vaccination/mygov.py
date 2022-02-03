@@ -48,7 +48,10 @@ def set_data_from_keys(
     key_prev_all_all: str,
 
     key_curr_dose1_15: str,
-    key_prev_dose1_15: str
+    key_prev_dose1_15: str,
+
+    key_curr_dose2_15: str,
+    key_prev_dose2_15: str
 ) -> None:
     """
     Give keys, set data.
@@ -80,9 +83,15 @@ def set_data_from_keys(
     state_15["1st_dose"]["new"] = (int(data[key_curr_dose1_15])
                                    - int(data[key_prev_dose1_15]))
 
-    # As of 12th January, for 15-18 there is only 1 dose.
-    state_15["all_doses"]["total"] = state_15["1st_dose"]["total"]
-    state_15["all_doses"]["new"] = state_15["1st_dose"]["new"]
+    state_15["2nd_dose"]["total"] = int(data[key_curr_dose2_15])
+    state_15["2nd_dose"]["new"] = (int(data[key_curr_dose2_15])
+                                   - int(data[key_prev_dose2_15]))
+
+    # As of 3rd February, for 15-18 there are only 1st and 2nd doses.
+    state_15["all_doses"]["total"] = (state_15["1st_dose"]["total"]
+                                      + state_15["2nd_dose"]["total"])
+    state_15["all_doses"]["new"] = (state_15["1st_dose"]["new"]
+                                    + state_15["2nd_dose"]["new"])
 
     # Set stats for 18+ age group. 18+ = Total - (15 to 18)
     state_18 = state_stats["18+"]
@@ -128,7 +137,8 @@ def fill_mygov_data(pretty: dict[str, Any]) -> None:
         "india_dose2", "india_last_dose2",
         "precaution_dose", "india_last_precaution_dose",
         "india_total_doses", "india_last_total_doses",
-        "india_dose1_15_18", "india_last_dose1_15_18"
+        "india_dose1_15_18", "india_last_dose1_15_18",
+        "india_dose2_15_18", "india_last_dose2_15_18"
     )
 
     # Now set state data.
@@ -148,7 +158,8 @@ def fill_mygov_data(pretty: dict[str, Any]) -> None:
             "dose2", "last_dose2",
             "precaution_dose", "last_precaution_dose",
             "total_doses", "last_total_doses",
-            "dose1_15_18", "last_dose1_15_18"
+            "dose1_15_18", "last_dose1_15_18",
+            "dose2_15_18", "last_dose2_15_18"
         )
 # End of fill_mygov_data()
 

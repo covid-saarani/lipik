@@ -23,12 +23,12 @@
 # Import standard library dependencies.
 import json
 import locale
-from string import digits
 from tempfile import NamedTemporaryFile
 from typing import Any
 
 # Import external dependencies.
 import camelot
+import pandas
 import pendulum
 import requests
 
@@ -102,6 +102,56 @@ def set_all_ages_doses(vaccination_dict: dict[str, Any]) -> None:
 # End of set_all_ages_doses()
 
 
+def check_if_5x5_national_stats(national_table: pandas.DataFrame):
+    """Check if we parsed the national table with 5x5 dimension."""
+    return (
+        len(national_table) == 5
+        and len(national_table.columns) == 5
+
+        and national_table[1][2].count("\n") == 1  # 18+ 1st Dose\n2nd Dose.
+        and national_table[1][3].count("\n") == 1  # Numbers of doses.
+        and national_table[1][4].count("\n") == 3  # Last 24 hours stat.
+
+        and national_table[2][2].count("\n") == 1  # 15-18 1st Dose\n2nd Dose.
+        and national_table[2][3].count("\n") == 1  # Number of doses.
+        and national_table[2][4].count("\n") == 3  # Last 24 hours stat.
+
+        and national_table[3][1] == "Precaution Dose"
+        and national_table[3][3].count("\n") == 0  # Number of 3rd doses.
+        and national_table[3][4].count("\n") == 1  # Last 24 hours stat.
+    )
+# End of check_if_5x5_national_stats()
+
+
+def check_if_5x7_national_stats(national_table: pandas.DataFrame):
+    """Check if we parsed the national table with 5x7 dimension."""
+    return (
+        len(national_table) == 5
+        and len(national_table.columns) == 6
+
+        and national_table[1][2].count("\n") == 0  # 18+'s 1st dose.
+        and national_table[1][3].count("\n") == 0  # Numbers of doses.
+        and national_table[1][4].count("\n") == 1  # Last 24 hours stat.
+
+        and national_table[2][2].count("\n") == 0  # 18+'s 2nd dose.
+        and national_table[2][3].count("\n") == 0  # Numbers of doses.
+        and national_table[2][4].count("\n") == 1  # Last 24 hours stat.
+
+        and national_table[3][2].count("\n") == 0  # 15-18's 1st dose.
+        and national_table[3][3].count("\n") == 0  # Number of doses.
+        and national_table[3][4].count("\n") == 1  # Last 24 hours stat.
+
+        and national_table[4][2].count("\n") == 0  # 15-18's 2nd dose.
+        and national_table[4][3].count("\n") == 0  # Number of doses.
+        and national_table[4][4].count("\n") == 1  # Last 24 hours stat.
+
+        and national_table[5][1] == "Precaution Dose"
+        and national_table[5][3].count("\n") == 0  # Number of 3rd doses.
+        and national_table[5][4].count("\n") == 1  # Last 24 hours stat.
+    )
+# End of check_if_5x6_national_stats()
+
+
 def fill_mohfw_data(
     pretty: dict[str, Any],
     yesterday: pendulum.DateTime,
@@ -128,34 +178,83 @@ def fill_mohfw_data(
     national_table = tables[0].df
     states_table = tables[1].df
 
-    if (
-        len(national_table) != 5
-        or len(national_table.columns) != 6
+    # Check if state table is good.
+    if len(states_table) != 41 or len(states_table.columns) != 8:
+        print(states_table.to_string())  # For logging in CI.
+        raise InvalidPdfException("State-wise vaccination stats "
+                                  "not parsed correctly.")
 
-        or national_table[1][2].count("\n") != 0  # 1st dose.
-        or national_table[1][3].count("\n") != 0  # Numbers of doses.
-        or national_table[1][4].count("\n") != 1  # Last 24 hours stat.
+    # Now, set national stats.
 
-        or national_table[2][2].count("\n") != 0  # 2nd dose.
-        or national_table[2][3].count("\n") != 0  # Numbers of doses.
-        or national_table[2][4].count("\n") != 1  # Last 24 hours stat.
+    national_18 = pretty["All"]["vaccination"]["18+"]
+    national_15 = pretty["All"]["vaccination"]["15-18"]
 
-        or national_table[3][2].count("\n") != 0  # 15-18's 1st dose.
-        or national_table[3][3].count("\n") != 0  # Number of ^.
-        or national_table[3][4].count("\n") != 1  # Last 24 hours stat.
+    if check_if_5x5_national_stats(national_table):
+        print("Parsed in 5x5 format")
 
-        or national_table[4][1] != "Precaution Dose"
-        or national_table[4][3].count("\n") != 0  # Number of doses.
-        or national_table[4][4].count("\n") != 1  # Last 24 hours stat.
-    ):
+        # For 18+ stats:
+        total = national_table[1][3].split("\n")
+        new = national_table[1][4].split("\n")
+
+        national_18["1st_dose"]["total"] = locale.atoi(total[0])
+        national_18["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+        national_18["2nd_dose"]["total"] = locale.atoi(total[1])
+        national_18["2nd_dose"]["new"] = locale.atoi(new[1].split()[0][1:])
+
+        # For 18+ precaution dose:
+        national_18["3rd_dose"]["total"] = locale.atoi(national_table[3][3])
+        national_18["3rd_dose"]["new"] = locale.atoi(
+            national_table[3][4].split()[0][1:]
+        )
+
+        # For 15-18 stats:
+        total = national_table[2][3].split("\n")
+        new = national_table[2][4].split("\n")
+
+        national_15["1st_dose"]["total"] = locale.atoi(total[0])
+        national_15["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+        national_15["2nd_dose"]["total"] = locale.atoi(total[1])
+        national_15["2nd_dose"]["new"] = locale.atoi(new[1].split()[0][1:])
+
+        # No 3rd doses for 15-18 group as of 3rd Feb 2022.
+
+    elif check_if_5x7_national_stats(national_table):
+        print("Parsed in 5x7 format")
+
+        # For 18+ 1st doses:
+        new = national_table[1][4].split("\n")
+        national_18["1st_dose"]["total"] = locale.atoi(national_table[1][3])
+        national_18["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+        # For 18+ 2nd doses:
+        new = national_table[2][4].split("\n")
+        national_18["2nd_dose"]["total"] = locale.atoi(national_table[2][3])
+        national_18["2nd_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+        # For 18+ precaution dose:
+        national_18["3rd_dose"]["total"] = locale.atoi(national_table[5][3])
+        national_18["3rd_dose"]["new"] = locale.atoi(
+            national_table[5][4].split()[0][1:]
+        )
+
+        # For 15-18 1st doses:
+        new = national_table[3][4].split("\n")
+        national_18["1st_dose"]["total"] = locale.atoi(national_table[3][3])
+        national_18["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+        # For 15-18 2nd doses:
+        new = national_table[4][4].split("\n")
+        national_18["2nd_dose"]["total"] = locale.atoi(national_table[4][3])
+        national_18["2nd_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
+
+    else:
         print(national_table.to_string())  # For logging in CI.
         raise InvalidPdfException("National vaccination stats "
                                   "not parsed correctly.")
 
-    if len(states_table) != 41 or len(states_table.columns) != 7:
-        print(states_table.to_string())  # For logging in CI.
-        raise InvalidPdfException("State-wise vaccination stats "
-                                  "not parsed correctly.")
+    # Total vaccination for all ages will be set later.
 
     # Set timestamp (= as on 7 AM of today, data is of yesterday).
     pretty["timestamp"]["vaccination"] = {
@@ -163,33 +262,6 @@ def fill_mohfw_data(
         "as_on": pendulum.today("Asia/Kolkata").format("DD MMM YYYY 07:00 zz"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }
-
-    # Now, set national stats.
-
-    national_18 = pretty["All"]["vaccination"]["18+"]
-    national_15 = pretty["All"]["vaccination"]["15-18"]
-
-    # For 18+ first doses:
-    new = national_table[1][4].split("\n")
-    national_18["1st_dose"]["total"] = locale.atoi(national_table[1][3])
-    national_18["1st_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
-
-    # For 18+ second doses:
-    new = national_table[2][4].split("\n")
-    national_18["2nd_dose"]["total"] = locale.atoi(national_table[2][3])
-    national_18["2nd_dose"]["new"] = locale.atoi(new[0].split()[0][1:])
-
-    # For 18+ precaution dose:
-    national_18["3rd_dose"]["total"] = locale.atoi(national_table[4][3])
-    national_18["3rd_dose"]["new"] = locale.atoi(
-                                        national_table[4][4].split()[0][1:])
-
-    # For 15-18 1st dose:
-    national_15["1st_dose"]["total"] = locale.atoi(national_table[3][3])
-    national_15["1st_dose"]["new"] = locale.atoi(
-                                        national_table[3][4].split()[0][1:])
-
-    # Total vaccination for all ages will be set later.
 
     # We proceed to set state stats now.
 
@@ -201,7 +273,7 @@ def fill_mohfw_data(
     for i in range(3, 41):
         # Done because sometimes columns can be detected merged.
         state_name = str(states_table[0][i]) + states_table[1][i]
-        state_name = state_name.strip(digits)
+        state_name = state_name.strip("0123456789").strip().replace("\n", "")
 
         if state_name not in pretty_states_set:
             state_name = find_name(state_name, pretty_states_tuple)
@@ -211,10 +283,10 @@ def fill_mohfw_data(
 
         state_stats_18["1st_dose"]["total"] = locale.atoi(states_table[2][i])
         state_stats_18["2nd_dose"]["total"] = locale.atoi(states_table[3][i])
-        state_stats_18["3rd_dose"]["total"] = locale.atoi(states_table[5][i])
+        state_stats_18["3rd_dose"]["total"] = locale.atoi(states_table[6][i])
 
-        # For 15+, 1st dose only, so 1st dose == all doses.
         state_stats_15["1st_dose"]["total"] = locale.atoi(states_table[4][i])
+        state_stats_15["2nd_dose"]["total"] = locale.atoi(states_table[5][i])
 
     # Now we set new / delta increase by comparing with previous data.
 
