@@ -1,6 +1,7 @@
 beautifulsoup4
 camelot-py[base]
 lxml
+pandas
 pendulum
 pylightxl
 requests
