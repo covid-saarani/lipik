@@ -96,7 +96,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
 
     # The URL can be at times invalid, and changing date may work.
     xlsx_url = pretty["internal"]["mohfw_xlsx"]
-    xlsx_date_str = xlsx_url.split(".")[-2][-9:]  # Example: 13Jan2022
+    xlsx_date_str = xlsx_url.split(".")[-2][-9:].title()  # Example: 13Jan2022
     xlsx_date = pendulum.from_format(xlsx_date_str, "DDMMMYYYY")
 
     for i in range(3):  # Will check 3 times -> Current, -1 day, -2 days.
