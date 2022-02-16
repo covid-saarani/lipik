@@ -33,7 +33,6 @@ from Helpers.fuzzy_find_name import find_name
 def parse_mohfw(
     pretty: dict[str, Any],  # Formatted dict.
     mohfw: list[dict[str, str]],  # Dict directly from json.
-    yesterday: pendulum.DateTime,
     reconciliation_only: bool = False  # If only to fill reconciliation data.
 ) -> None:
     """
@@ -113,7 +112,7 @@ def parse_mohfw(
 
     # Store timestamps.
     pretty["timestamp"]["cases"] = {
-        "date": yesterday.format("DD MMM YYYY"),
+        "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
         "as_on": pendulum.now("Asia/Kolkata").format("DD MMM YYYY, HH:mm zz"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }

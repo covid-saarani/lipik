@@ -31,7 +31,6 @@ import pendulum
 def parse_mygov(
     pretty: dict[str, Any],  # Formatted dict.
     mygov: dict[str, Union[str, dict[str, str]]],  # Dict directly from json.
-    yesterday: pendulum.DateTime,
     fill_data: bool = True
 ) -> None:
     """
@@ -70,14 +69,6 @@ def parse_mygov(
     # If asked not to fill stats, we are done here.
     if not fill_data:
         return
-
-    # Store timestamps.
-    pretty["timestamp"]["cases"] = {
-        "date": yesterday.format("DD MMM YYYY"),
-        "as_on": mygov["as_on"],
-        "last_updated_unix": mygov["updated_on"],
-        "last_fetched_unix": round(pendulum.now().timestamp())
-    }
 
     # For setting in national stats.
     national_confirmed = pretty["All"]["confirmed"]
@@ -165,6 +156,14 @@ def parse_mygov(
     national_deaths["ratio_pc"] = round(
         (100 * national_deaths["current"]) / national_total, 5
     )
+
+    # Store timestamps.
+    pretty["timestamp"]["cases"] = {
+        "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
+        "as_on": mygov["as_on"],
+        "last_updated_unix": mygov["updated_on"],
+        "last_fetched_unix": round(pendulum.now().timestamp())
+    }
 # End of parse_mygov()
 
 

@@ -191,26 +191,56 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
             # Delete the field.
             del dist_dict["iteration"]
 
-    # Now we will set aggregate national stats.
+    # Now we will set aggregate national and state stats.
 
-    natl = copy.deepcopy(district_struct)
+    natl_agg = copy.deepcopy(district_struct)
 
     for state in pretty_states_set:
-        for district in (districts := pretty[state]["districts"]):
-            natl["centers"] += districts[district]["centers"]
-            natl["rat_pc"] += districts[district]["rat_pc"]
-            natl["rtpcr_pc"] += districts[district]["rtpcr_pc"]
-            natl["positivity_rate"] += districts[district]["positivity_rate"]
-            natl["iteration"] += 1
+        state_agg = copy.deepcopy(district_struct)
 
-    num = natl["iteration"]
-    del natl["iteration"]
+        if not pretty[state]["districts"]:
+            # No districts available to loop over. Example: Miscellaneous.
+            del state_agg["iteration"]
+            pretty[state]["districts"]["Aggregate"] = state_agg
+            continue
 
-    natl["rat_pc"] = round((natl["rat_pc"] / num), 5)
-    natl["rtpcr_pc"] = round((natl["rtpcr_pc"] / num), 5)
-    natl["positivity_rate"] = round((natl["positivity_rate"] / num), 5)
+        # Loop over all districts to set state aggregate.
+        for distr in (districts := pretty[state]["districts"]):
+            state_agg["centers"] += districts[distr]["centers"]
+            state_agg["rat_pc"] += districts[distr]["rat_pc"]
+            state_agg["rtpcr_pc"] += districts[distr]["rtpcr_pc"]
+            state_agg["positivity_rate"] += districts[distr]["positivity_rate"]
+            state_agg["iteration"] += 1
 
-    pretty["All"]["districts"]["Aggregate"] = natl
+        # Add to national aggregate first before proceeding.
+        natl_agg["centers"] += state_agg["centers"]
+        natl_agg["rat_pc"] += state_agg["rat_pc"]
+        natl_agg["rtpcr_pc"] += state_agg["rtpcr_pc"]
+        natl_agg["positivity_rate"] += state_agg["positivity_rate"]
+        natl_agg["iteration"] += state_agg["iteration"]
+
+        # Now set the percentage in state aggregate.
+        num = state_agg["iteration"]
+        state_agg["rat_pc"] = round((state_agg["rat_pc"] / num), 5)
+        state_agg["rtpcr_pc"] = round((state_agg["rtpcr_pc"] / num), 5)
+        state_agg["positivity_rate"] = round(
+            (state_agg["positivity_rate"] / num), 5
+        )
+
+        # Store the state aggregate.
+        del state_agg["iteration"]
+        pretty[state]["districts"]["Aggregate"] = state_agg
+    # End of for loop over the states.
+
+    # Set %ages and store national aggregate.
+
+    num = natl_agg["iteration"]
+    natl_agg["rat_pc"] = round((natl_agg["rat_pc"] / num), 5)
+    natl_agg["rtpcr_pc"] = round((natl_agg["rtpcr_pc"] / num), 5)
+    natl_agg["positivity_rate"] = round((natl_agg["positivity_rate"] / num), 5)
+
+    del natl_agg["iteration"]
+    pretty["All"]["districts"]["Aggregate"] = natl_agg
 # End of fill_district_data()
 
 

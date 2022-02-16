@@ -32,11 +32,7 @@ from .mygov import fill_mygov_data
 from .mygov_centers import fill_state_centers
 
 
-def fill_vaccination(
-    pretty: dict[str, Any],
-    yesterday: pendulum.DateTime,
-    day_before_yesterday: pendulum.DateTime
-) -> None:
+def fill_vaccination(pretty: dict[str, Any]) -> None:
     """
     Fetches data from either MyGov or MoHFW, and fills in the `pretty` dict.
 
@@ -54,7 +50,7 @@ def fill_vaccination(
     if pretty["internal"]["use_mygov"]:
         fill_mygov_data(pretty)
     else:
-        fill_mohfw_data(pretty, yesterday, day_before_yesterday)
+        fill_mohfw_data(pretty)
 # End of fill_vaccination()
 
 

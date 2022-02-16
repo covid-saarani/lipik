@@ -42,15 +42,29 @@ from Vaccination.vaccination import fill_vaccination
 pretty = {}  # Formatted dict containing all data for a state.
 pretty["timestamp"] = {}  # For storing timestamps of data.
 
-# For internal use, will delete later.
+# Make a dict for internal use, will delete later.
+
 mygov_url = "https://www.mygov.in/sites/default/files/covid/"
+yesterday = pendulum.yesterday("Asia/Kolkata")
+day_before_yesterday = yesterday.subtract(days=1)
+
 pretty["internal"] = {
     "use_mygov": True,
+
     "mygov_cases": mygov_url + "covid_state_counts_ver1.json",
     "mygov_vaccination": mygov_url + "vaccine/vaccine_counts_today.json",
     "mygov_state_centers": mygov_url + "vaccine/vaccination_states.json",
     "mygov_district_centers": mygov_url + "vaccine/vaccination_districts.json",
-    "mohfw_cases": "https://www.mohfw.gov.in/data/datanew.json"
+    "mohfw_cases": "https://www.mohfw.gov.in/data/datanew.json",
+
+    "yesterday": yesterday,
+    "day_before_yesterday": day_before_yesterday,
+
+    "old_filename": (
+        "../saarani/Daily/"
+        + day_before_yesterday.format("YYYY_MM_DD")
+        + ".json"
+    )
 }
 
 # Parse MoHFW website and get the requisite links.
@@ -140,26 +154,14 @@ pretty["Miscellaneous"]["helpline"] = ""
 pretty["Miscellaneous"]["donate"] = ""
 
 
-# Set yesterday and day before yesterday.
-
-now = pendulum.now("Asia/Kolkata")
-
-# Stats come after 0830 IST for the prev day (we fetch hourly).
-if now.hour < 8 or (now.hour == 8 and now.minute < 30):
-    yesterday = now.subtract(days=2)
-else:
-    yesterday = now.subtract(days=1)
-
-day_before_yesterday = yesterday.subtract(days=1)
-
-
 # Fill the dictionary.
-fill_cases(pretty, yesterday)
-fill_vaccination(pretty, yesterday, day_before_yesterday)
+fill_cases(pretty)  # Will also update pretty["internal"]["yesterday"]
+fill_vaccination(pretty)
 fill_district_data(pretty)
 
-# Move Miscellaneous at the end, and delete the "internal" dict.
+# Move Miscellaneous at the end, get yesterday, and delete the "internal" dict.
 pretty["Miscellaneous"] = pretty.pop("Miscellaneous")
+yesterday = pretty["internal"]["yesterday"]
 del pretty["internal"]
 
 

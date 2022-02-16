@@ -152,11 +152,7 @@ def check_if_5x7_national_stats(national_table: pandas.DataFrame):
 # End of check_if_5x6_national_stats()
 
 
-def fill_mohfw_data(
-    pretty: dict[str, Any],
-    yesterday: pendulum.DateTime,
-    day_before_yesterday: pendulum.DateTime
-) -> None:
+def fill_mohfw_data(pretty: dict[str, Any]) -> None:
     """Get state vaccination stats from MoHFW PDF, and fill it in `pretty`."""
 
     pdf = NamedTemporaryFile(suffix=".pdf")
@@ -258,7 +254,7 @@ def fill_mohfw_data(
 
     # Set timestamp (= as on 7 AM of today, data is of yesterday).
     pretty["timestamp"]["vaccination"] = {
-        "date": yesterday.format("DD MMM YYYY"),
+        "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
         "as_on": pendulum.today("Asia/Kolkata").format("DD MMM YYYY 07:00 zz"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }
@@ -290,48 +286,45 @@ def fill_mohfw_data(
 
     # Now we set new / delta increase by comparing with previous data.
 
-    old_filename = ("../saarani/" + day_before_yesterday.format("YYYY_MM_DD")
-                    + ".json")
-
     try:
-        with open(old_filename) as f:
-            old_data = json.load(f)
+        with open(pretty["internal"]["old_filename"]) as f:
+            old_data = json.load(f)  # Day before yesterday's data.
+
     except FileNotFoundError:
         # We don't have previous data, so can't figure out new doses.
         pass
+
     else:
-        old_as_on = old_data["timestamp"]["vaccination"]["as_on"]
+        for old_state in (set(old_data.keys()) - {"All", "timestamp"}):
+            # Do for states only as we already have delta data for national.
 
-        # Do for states only, and only if we have the previous day's data.
-        if old_as_on.split()[0] == yesterday.format("DD MMM YYYY"):
-            for old_state in (set(old_data.keys()) - {"All", "timestamp"}):
-                if old_state in pretty_states_set:
-                    new_state = old_state
-                else:
-                    new_state = find_name(state_name, pretty_states_tuple)
+            if old_state in pretty_states_set:
+                new_state = old_state
+            else:
+                new_state = find_name(old_state, pretty_states_tuple)
 
-                old_18 = old_data[old_state]["vaccination"]["18+"]
-                old_15 = old_data[old_state]["vaccination"]["15-18"]
-                new_18 = pretty[new_state]["vaccination"]["18+"]
-                new_15 = pretty[new_state]["vaccination"]["15-18"]
+            old_18 = old_data[old_state]["vaccination"]["18+"]
+            old_15 = old_data[old_state]["vaccination"]["15-18"]
+            new_18 = pretty[new_state]["vaccination"]["18+"]
+            new_15 = pretty[new_state]["vaccination"]["15-18"]
 
-                new_18["1st_dose"]["new"] = (new_18["1st_dose"]["total"]
-                                             - old_18["1st_dose"]["total"])
+            new_18["1st_dose"]["new"] = (new_18["1st_dose"]["total"]
+                                         - old_18["1st_dose"]["total"])
 
-                new_18["2nd_dose"]["new"] = (new_18["2nd_dose"]["total"]
-                                             - old_18["2nd_dose"]["total"])
+            new_18["2nd_dose"]["new"] = (new_18["2nd_dose"]["total"]
+                                         - old_18["2nd_dose"]["total"])
 
-                new_18["3rd_dose"]["new"] = (new_18["3rd_dose"]["total"]
-                                             - old_18["3rd_dose"]["total"])
+            new_18["3rd_dose"]["new"] = (new_18["3rd_dose"]["total"]
+                                         - old_18["3rd_dose"]["total"])
 
-                new_15["1st_dose"]["new"] = (new_15["1st_dose"]["total"]
-                                             - old_15["1st_dose"]["total"])
+            new_15["1st_dose"]["new"] = (new_15["1st_dose"]["total"]
+                                         - old_15["1st_dose"]["total"])
 
-                new_15["2nd_dose"]["new"] = (new_15["2nd_dose"]["total"]
-                                             - old_15["2nd_dose"]["total"])
+            new_15["2nd_dose"]["new"] = (new_15["2nd_dose"]["total"]
+                                         - old_15["2nd_dose"]["total"])
 
-                new_15["3rd_dose"]["new"] = (new_15["3rd_dose"]["total"]
-                                             - old_15["3rd_dose"]["total"])
+            new_15["3rd_dose"]["new"] = (new_15["3rd_dose"]["total"]
+                                         - old_15["3rd_dose"]["total"])
 
     # Now set all_doses, as well as all_ages data.
     for state in (pretty_states_set | {"All"}):
