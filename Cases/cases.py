@@ -46,6 +46,8 @@ def set_yesterday_to_day_before(pretty: dict[str, Any]) -> None:
         + day_before_yesterday.format("YYYY_MM_DD")
         + ".json"
     )
+
+    pretty["timestamp"]["cases"]["date"] = yesterday.format("DD MMM YYYY")
 # End of set_yesterday_to_day_before().
 
 
