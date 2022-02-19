@@ -44,8 +44,7 @@ def parse_mohfw(
     for data in mohfw:
         if data["state_name"] in pretty_states_set:
             state = data["state_name"]
-        elif not data["state_name"] and data["sno"] == "11111":
-            # National stats.
+        elif not data["state_name"]:  # Empty str implies national stats.
             state = "All"
         else:
             state = find_name(data["state_name"], pretty_states_tuple)
