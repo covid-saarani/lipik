@@ -25,8 +25,8 @@
 name: Clerk work
 
 on:
-  schedule:  # Every hour (at the 15th minute).
-    - cron: 15 * * * *
+  schedule:  # Every hour (at the UTC 45th minute => IST 15th minute).
+    - cron: 45 * * * *
 
   workflow_dispatch: {}  # For manual switch.
 

@@ -1,6 +1,9 @@
 # Lipik (लिपिक) 
 
-Clerk for filling in the data. Runs hourly at the 15th minute mark.
+Clerk for filling in the data.
+
+Scheduled to run hourly at the 15th minute mark (45th minute mark in UTC),
+but there is no assurance of exact schedule by GitHub, and delays are common.
 
 It does the following things:
 
@@ -8,4 +11,5 @@ It does the following things:
 
 2. Constructs appropriate files for API and dashboard.
 
-3. Stores the data in a dedicated repo (the [सारणी](https://github.com/covid-saarani/saarani)).
+3. Stores the data in a dedicated repo (the
+[सारणी](https://github.com/covid-saarani/saarani)).
