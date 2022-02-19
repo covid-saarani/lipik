@@ -252,10 +252,10 @@ def fill_mohfw_data(pretty: dict[str, Any]) -> None:
 
     # Total vaccination for all ages will be set later.
 
-    # Set timestamp (= as on 7 AM of today, data is of yesterday).
+    # Set timestamp (data is of yesterday).
     pretty["timestamp"]["vaccination"] = {
+        "primary_source": "mohfw",
         "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
-        "as_on": pendulum.today("Asia/Kolkata").format("DD MMM YYYY 07:00 zz"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }
 

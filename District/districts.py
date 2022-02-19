@@ -121,6 +121,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
     # Set timestamps and meta data.
 
     pretty["timestamp"]["districts"] = {
+        "primary_source": "mohfw",
         "week": sheet.address("B7"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }

@@ -125,8 +125,9 @@ def fill_mygov_data(pretty: dict[str, Any]) -> None:
 
     # Set timestamp.
     pretty["timestamp"]["vaccination"] = {
+        "primary_source": "mygov",
         "date": pendulum.parse(stats["day"]).format("DD MMM YYYY"),
-        "as_on": pendulum.now("Asia/Kolkata").format("DD MMM YYYY, HH:mm zz"),
+        "as_on": stats["updated_on"],
         "last_fetched_unix": round(pendulum.now().timestamp())
     }
 

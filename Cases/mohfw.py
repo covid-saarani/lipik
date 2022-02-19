@@ -111,8 +111,8 @@ def parse_mohfw(
 
     # Store timestamps.
     pretty["timestamp"]["cases"] = {
+        "primary_source": "mohfw",
         "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
-        "as_on": pendulum.now("Asia/Kolkata").format("DD MMM YYYY, HH:mm zz"),
         "last_fetched_unix": round(pendulum.now().timestamp())
     }
 # End of parse_mohfw()

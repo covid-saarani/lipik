@@ -159,6 +159,7 @@ def parse_mygov(
 
     # Store timestamps.
     pretty["timestamp"]["cases"] = {
+        "primary_source": "mygov",
         "date": pretty["internal"]["yesterday"].format("DD MMM YYYY"),
         "as_on": mygov["as_on"],
         "last_updated_unix": mygov["updated_on"],
