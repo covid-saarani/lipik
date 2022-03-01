@@ -22,6 +22,7 @@
 
 # Import standard library dependencies.
 import copy
+from dateutil.parser import parse as date_parser
 import pickle
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -96,8 +97,8 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
 
     # The URL can be at times invalid, and changing date may work.
     xlsx_url = pretty["internal"]["mohfw_xlsx"]
-    xlsx_date_str = xlsx_url.split(".")[-2][-9:].title()  # Example: 13Jan2022
-    xlsx_date = pendulum.from_format(xlsx_date_str, "DDMMMYYYY")
+    xlsx_date_str = xlsx_url.split("Analysis")[1].split(".")[0]
+    xlsx_date = date_parser(xlsx_date_str, fuzzy=True, dayfirst=True)
 
     for i in range(3):  # Will check 3 times -> Current, -1 day, -2 days.
         response = requests.get(xlsx_url)
@@ -106,6 +107,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
         else:
             new_date = xlsx_date.subtract(days=(i + 1)).format("DDMMMYYYY")
             xlsx_url = xlsx_url.replace(xlsx_date_str, new_date)
+            xlsx_date_str = new_date
     else:
         # For loop didn't break.
         raise ValueError("Cannot get district xlsx file (status_code != 200).")
