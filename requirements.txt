@@ -4,5 +4,6 @@ lxml
 pandas
 pendulum
 pylightxl
+python-dateutil
 requests
 thefuzz[speedup]
