@@ -102,12 +102,19 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
         date_parser(xlsx_date_str, fuzzy=True, dayfirst=True)
     )
 
+    if xlsx_date.format("DDMMMMYYYY") == xlsx_date_str:
+        date_format = "DDMMMMYYYY"
+    elif xlsx_date.format("DDMMMYYYY") == xlsx_date_str:
+        date_format = "DDMMMYYYY"
+    else:
+        date_format = "DDMMMYYYY"  # No case of DDMMYYYY filename yet.
+
     for i in range(3):  # Will check 3 times -> Current, -1 day, -2 days.
         response = requests.get(xlsx_url)
         if response.status_code == 200:
             break
         else:
-            new_date = xlsx_date.subtract(days=(i + 1)).format("DDMMMYYYY")
+            new_date = xlsx_date.subtract(days=(i + 1)).format(date_format)
             xlsx_url = xlsx_url.replace(xlsx_date_str, new_date)
             xlsx_date_str = new_date
     else:
