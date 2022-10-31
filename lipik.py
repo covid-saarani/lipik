@@ -141,6 +141,13 @@ pretty["All"] = {
             "2nd_dose": {"total": 0, "new": 0},
             "3rd_dose": {"total": 0, "new": 0},
         },
+
+        "12-14": {
+            "all_doses": {"total": 0, "new": 0},
+            "1st_dose": {"total": 0, "new": 0},
+            "2nd_dose": {"total": 0, "new": 0},
+            "3rd_dose": {"total": 0, "new": 0},
+        },
     },
 
     "districts": {}

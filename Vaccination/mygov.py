@@ -31,90 +31,149 @@ import requests
 from Helpers.fuzzy_find_name import find_name
 
 
+def set_all_doses(age_data: dict[str, Any]) -> None:
+    """Populate all_doses dict."""
+
+    age_data["all_doses"]["total"] = (
+        age_data["1st_dose"]["total"]
+        + age_data["2nd_dose"]["total"]
+        + age_data["3rd_dose"]["total"]
+    )
+
+    age_data["all_doses"]["new"] = (
+        age_data["1st_dose"]["new"]
+        + age_data["2nd_dose"]["new"]
+        + age_data["3rd_dose"]["new"]
+    )
+# End of set_all_doses().
+
+
 def set_data_from_keys(
     state_stats: dict[str, Any],
     data: dict[str, Any],
 
-    key_curr_dose1_all: str,
-    key_prev_dose1_all: str,
+    # Total
+    key_curr_dose_all: str, key_prev_dose_all: str,
 
-    key_curr_dose2_all: str,
-    key_prev_dose2_all: str,
+    # 18+
+    key_curr_dose1_18: str, key_prev_dose1_18: str,
+    key_curr_dose2_18: str, key_prev_dose2_18: str,
+    key_curr_dose3_18: str, key_prev_dose3_18: str,
 
-    key_curr_dose3_all: str,
-    key_prev_dose3_all: str,
+    # 60+
+    key_curr_dose3_60: str, key_prev_dose3_60: str,
 
-    key_curr_all_all: str,
-    key_prev_all_all: str,
+    # 15-15
+    key_curr_dose1_15: str, key_prev_dose1_15: str,
+    key_curr_dose2_15: str, key_prev_dose2_15: str,
 
-    key_curr_dose1_15: str,
-    key_prev_dose1_15: str,
+    # 12-14
+    key_curr_dose1_12: str, key_prev_dose1_12: str,
+    key_curr_dose2_12: str, key_prev_dose2_12: str,
 
-    key_curr_dose2_15: str,
-    key_prev_dose2_15: str
 ) -> None:
     """
-    Give keys, set data.
+    Given keys, set data.
     """
-
-    # Set stats for total / all ages.
     state_all = state_stats["all_ages"]
-
-    state_all["1st_dose"]["total"] = int(data[key_curr_dose1_all])
-    state_all["1st_dose"]["new"] = (int(data[key_curr_dose1_all])
-                                    - int(data[key_prev_dose1_all]))
-
-    state_all["2nd_dose"]["total"] = int(data[key_curr_dose2_all])
-    state_all["2nd_dose"]["new"] = (int(data[key_curr_dose2_all])
-                                    - int(data[key_prev_dose2_all]))
-
-    state_all["3rd_dose"]["total"] = int(data[key_curr_dose3_all])
-    state_all["3rd_dose"]["new"] = (int(data[key_curr_dose3_all])
-                                    - int(data[key_prev_dose3_all]))
-
-    state_all["all_doses"]["total"] = int(data[key_curr_all_all])
-    state_all["all_doses"]["new"] = (int(data[key_curr_all_all])
-                                     - int(data[key_prev_all_all]))
-
-    # Set national 15-18 stats.
-    state_15 = state_stats["15-18"]
-
-    state_15["1st_dose"]["total"] = int(data[key_curr_dose1_15])
-    state_15["1st_dose"]["new"] = (int(data[key_curr_dose1_15])
-                                   - int(data[key_prev_dose1_15]))
-
-    state_15["2nd_dose"]["total"] = int(data[key_curr_dose2_15])
-    state_15["2nd_dose"]["new"] = (int(data[key_curr_dose2_15])
-                                   - int(data[key_prev_dose2_15]))
-
-    # As of 3rd February, for 15-18 there are only 1st and 2nd doses.
-    state_15["all_doses"]["total"] = (state_15["1st_dose"]["total"]
-                                      + state_15["2nd_dose"]["total"])
-    state_15["all_doses"]["new"] = (state_15["1st_dose"]["new"]
-                                    + state_15["2nd_dose"]["new"])
-
-    # Set stats for 18+ age group. 18+ = Total - (15 to 18)
     state_18 = state_stats["18+"]
+    state_15 = state_stats["15-18"]
+    state_12 = state_stats["12-14"]
 
-    state_18["1st_dose"]["total"] = (state_all["1st_dose"]["total"]
-                                     - state_15["1st_dose"]["total"])
-    state_18["1st_dose"]["new"] = (state_all["1st_dose"]["new"]
-                                   - state_15["1st_dose"]["new"])
+    # Helper function.
+    def get_data(key: str) -> int:
+        return int(data[key])
+    # End of get_data().
 
-    state_18["2nd_dose"]["total"] = (state_all["2nd_dose"]["total"]
-                                     - state_15["2nd_dose"]["total"])
-    state_18["2nd_dose"]["new"] = (state_all["2nd_dose"]["new"]
-                                   - state_15["2nd_dose"]["new"])
+    ###########################################################################
 
-    state_18["3rd_dose"]["total"] = (state_all["3rd_dose"]["total"]
-                                     - state_15["3rd_dose"]["total"])
-    state_18["3rd_dose"]["new"] = (state_all["3rd_dose"]["new"]
-                                   - state_15["3rd_dose"]["new"])
+    # Set 18+ stats.
 
-    state_18["all_doses"]["total"] = (state_all["all_doses"]["total"]
-                                      - state_15["all_doses"]["total"])
-    state_18["all_doses"]["new"] = (state_all["all_doses"]["new"]
-                                    - state_15["all_doses"]["new"])
+    state_18["1st_dose"]["total"] = get_data(key_curr_dose1_18)
+    state_18["1st_dose"]["new"] = (
+        get_data(key_curr_dose1_18) - get_data(key_prev_dose1_18)
+    )
+
+    state_18["2nd_dose"]["total"] = get_data(key_curr_dose2_18)
+    state_18["2nd_dose"]["new"] = (
+        get_data(key_curr_dose2_18) - get_data(key_prev_dose2_18)
+    )
+
+    state_18["3rd_dose"]["total"] = (
+        get_data(key_curr_dose3_18) + get_data(key_curr_dose3_60)
+    )
+    state_18["3rd_dose"]["new"] = (
+        get_data(key_curr_dose3_18) + get_data(key_curr_dose3_60)
+        - get_data(key_prev_dose3_18) - get_data(key_prev_dose3_60)
+    )
+
+    set_all_doses(state_18)
+
+    ###########################################################################
+
+    # Now set 15-18 stats.
+
+    state_15["1st_dose"]["total"] = get_data(key_curr_dose1_15)
+    state_15["1st_dose"]["new"] = (
+        get_data(key_curr_dose1_15) - get_data(key_prev_dose1_15)
+    )
+
+    state_15["2nd_dose"]["total"] = get_data(key_curr_dose2_15)
+    state_15["2nd_dose"]["new"] = (
+        get_data(key_curr_dose2_15) - get_data(key_prev_dose2_15)
+    )
+
+    set_all_doses(state_15)
+
+    ###########################################################################
+
+    # Now set 12-14 stats.
+
+    state_12["1st_dose"]["total"] = get_data(key_curr_dose1_12)
+    state_12["1st_dose"]["new"] = (
+        get_data(key_curr_dose1_12) - get_data(key_prev_dose1_12)
+    )
+
+    state_12["2nd_dose"]["total"] = get_data(key_curr_dose2_12)
+    state_12["2nd_dose"]["new"] = (
+        get_data(key_curr_dose2_12) - get_data(key_prev_dose2_12)
+    )
+
+    set_all_doses(state_12)
+
+    ###########################################################################
+
+    # Now set all ages data.
+
+    # Helper function
+    def add_data_all(dose_key: str, stat_key: str) -> int:
+        return (
+            state_18[dose_key][stat_key]
+            + state_15[dose_key][stat_key]
+            + state_12[dose_key][stat_key]
+        )
+    # End of add_data_all().
+
+    state_all["1st_dose"]["total"] = add_data_all("1st_dose", "total")
+    state_all["1st_dose"]["new"] = add_data_all("1st_dose", "new")
+
+    state_all["2nd_dose"]["total"] = add_data_all("2nd_dose", "total")
+    state_all["2nd_dose"]["new"] = add_data_all("2nd_dose", "new")
+
+    state_all["3rd_dose"]["total"] = add_data_all("3rd_dose", "total")
+    state_all["3rd_dose"]["new"] = add_data_all("3rd_dose", "new")
+
+    set_all_doses(state_all)
+
+    ###########################################################################
+
+    # Validate
+
+    all_total = get_data(key_curr_dose_all)
+    all_new = all_total - get_data(key_prev_dose_all)
+
+    assert all_total == state_all["all_doses"]["total"]
+    assert all_new == state_all["all_doses"]["new"]
 # End of set_data_from_keys()
 
 
@@ -134,12 +193,25 @@ def fill_mygov_data(pretty: dict[str, Any]) -> None:
     # Set national data
     set_data_from_keys(
         pretty["All"]["vaccination"], stats,
+
+        # Total
+        "india_total_doses", "india_last_total_doses",
+
+        # 18+
         "india_dose1", "india_last_dose1",
         "india_dose2", "india_last_dose2",
+        "india_dose3", "india_last_dose3",
+
+        # 60+
         "precaution_dose", "india_last_precaution_dose",
-        "india_total_doses", "india_last_total_doses",
+
+        # 15 - 18
         "india_dose1_15_18", "india_last_dose1_15_18",
-        "india_dose2_15_18", "india_last_dose2_15_18"
+        "india_dose2_15_18", "india_last_dose2_15_18",
+
+        # 12 - 14
+        "india_dose1_12_14", "india_last_dose1_12_14",
+        "india_dose2_12_14", "india_last_dose2_12_14"
     )
 
     # Now set state data.
@@ -155,12 +227,25 @@ def fill_mygov_data(pretty: dict[str, Any]) -> None:
 
         set_data_from_keys(
             pretty[state]["vaccination"], data,
+
+            # Total
+            "total_doses", "last_total_doses",
+
+            # 18+
             "dose1", "last_dose1",
             "dose2", "last_dose2",
+            "dose3", "last_dose3",
+
+            # 60+
             "precaution_dose", "last_precaution_dose",
-            "total_doses", "last_total_doses",
+
+            # 15 - 18
             "dose1_15_18", "last_dose1_15_18",
-            "dose2_15_18", "last_dose2_15_18"
+            "dose2_15_18", "last_dose2_15_18",
+
+            # 12 - 14
+            "dose1_12_14", "last_dose1_12_14",
+            "dose2_12_14", "last_dose2_12_14"
         )
 # End of fill_mygov_data()
 
