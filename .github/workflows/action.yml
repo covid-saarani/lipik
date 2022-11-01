@@ -44,13 +44,13 @@ jobs:
 
     steps:
       - name: Checkout Lipik
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: main
           path: lipik
 
       - name: Checkout Saarani
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: covid-saarani/saarani
@@ -58,9 +58,10 @@ jobs:
           path: saarani
 
       - name: Setup Python
-        uses: actions/setup-python@v2.3.1
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9.x
+          python-version: "3.9.x"
+          cache: "pip"  # This caches pip wheels, not package installation.
 
       - name: Generate locale and change timezone
         run:  |
@@ -72,17 +73,16 @@ jobs:
       # venv instead of pip wheels. This is much faster and does not require
       # installation of packages again. Note that environment isn't preserved
       # between runs.
-      - name: Cache virtual environment
-        uses: actions/cache@v2.1.7
-        id: cache-venv
+      - name: Setup venv cache
+        uses: actions/cache@v3
         with:
           path: ~/venv
-          key: ${{ runner.os }}-venv-${{ secrets.SOME_TIMESTAMP }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-venv-${{ secrets.SOME_STRING }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-venv-${{ secrets.SOME_TIMESTAMP }}-
+            ${{ runner.os }}-venv-${{ secrets.SOME_STRING }}-
 
-      - name: Make virtual environment
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+      # Due to existing installation, pip install will be fast.
+      - name: Install dependencies
         working-directory: ./lipik
         run: |
           python3 -m venv ~/venv
