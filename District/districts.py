@@ -153,7 +153,7 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
         while True:
             data = sheet.range(address=f"{col1}{j}:{col2}{j}")[0]
 
-            if data[0] == "Grand Total":
+            if data[0] == "Grand Total" or data[0] == "NA":
                 break
 
             if data[0]:  # If not empty string.
@@ -165,18 +165,22 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
             district_names_set = set(pretty[state]["districts"].keys())
             district_names_tuple = tuple(district_names_set)
 
-            district = district_name_fixer(data[1].title(), state)
+            district = district_name_fixer(data[1].title(), state).strip()
 
             if district not in district_names_set:
                 if (new_dist := f"{district} {state}") in district_names_set:
                     district = new_dist
                 else:
                     try:
-                        district = find_name(district, district_names_tuple)
+                        new_dist = find_name(district, district_names_tuple)
                     except ValueError:
-                        print(state, district, "\n", state_district_names)
+                        print(f"District \"{district}\" not found in state "
+                              f"{state}. Districts in {state} are as follows:")
+                        print(district_names_tuple)
                         state_districts_dict[district] = copy.deepcopy(
                                                             district_struct)
+                    else:
+                        district = new_dist
 
             state_districts_dict[district]["rat_pc"] += data[2]
             state_districts_dict[district]["rtpcr_pc"] += data[3]
