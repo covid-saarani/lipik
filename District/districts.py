@@ -145,15 +145,14 @@ def fill_district_data(pretty: dict[str, Any]) -> None:
 
     table_cols = (("C", "G"), ("J", "N"), ("Q", "U"))
 
-    for i in range(3):
+    for col1, col2 in table_cols:
         j = 12
-        col1, col2 = table_cols[i]
         state = ""  # Save it, as merged cells have the entry only in 1st cell.
 
         while True:
             data = sheet.range(address=f"{col1}{j}:{col2}{j}")[0]
 
-            if data[0] == "Grand Total" or data[0] == "NA":
+            if data[0].strip() in ("Grand Total", "NA"):
                 break
 
             if data[0]:  # If not empty string.
