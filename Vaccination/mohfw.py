@@ -140,27 +140,27 @@ def fill_mohfw_data(pretty: dict[str, Any]) -> None:
 
         # 18+ 1st and 2nd dose
         and national_table[1][1] == "18+ Population"
-        and national_table[1][2].count("\n") == 1  # 1st Dose \n2nd Dose
-        and national_table[1][3].count("\n") == 1  # Numbers of doses.
-        and national_table[1][4].count("\n") == 4  # Last 24 hours stat.
+        and national_table[1][2].count("\n") == 1       # 1st Dose \n2nd Dose
+        and national_table[1][3].count("\n") == 1       # Numbers of doses.
+        and national_table[1][4].count("\n") in (3, 4)  # Last 24 hours stat.
 
         # 15-18 1st and 2nd dose
         and national_table[2][1] == "15-18 Years"
         and national_table[2][2].count("\n") == 1  # Same as above...
         and national_table[2][3].count("\n") == 1
-        and national_table[2][4].count("\n") == 4
+        and national_table[2][4].count("\n") in (3, 4)
 
         # 12-14 1st and 2nd dose
         and national_table[3][1] == "12-14 Years"
         and national_table[3][2].count("\n") == 1
         and national_table[3][3].count("\n") == 1
-        and national_table[3][4].count("\n") == 4
+        and national_table[3][4].count("\n") in (3, 4)
 
         # 3rd dose (18+, 60+/worker)      "60+ Years, \n18-59 Years \nHCW, FLW"
         and national_table[4][1] == "Precaution Dose"
         and national_table[4][2].count("\n") == 2  # (The string above.)
         and national_table[4][3].count("\n") == 1
-        and national_table[4][4].count("\n") == 4
+        and national_table[4][4].count("\n") in (3, 4)
 
         and national_table[5][0] == "Total Doses"
         and national_table[5][3].count("\n") == 0  # Number of total doses.
@@ -223,7 +223,7 @@ def fill_mohfw_data(pretty: dict[str, Any]) -> None:
     # For 18+ 3rd dose. (18+ and 60+/HCW/FLW)
 
     dose_3_18, dose_3_60 = national_table[4][3].split()
-    new_dose_3_18, new_dose_3_60 = [i[1:] for i in national_table[2][4].split()
+    new_dose_3_18, new_dose_3_60 = [i[1:] for i in national_table[4][4].split()
                                     if i[0] == "("]
 
     national_18["3rd_dose"]["total"] = (str_to_int(dose_3_18)
