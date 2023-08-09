@@ -39,6 +39,27 @@ from District.districts import fill_district_data
 from Vaccination.vaccination import fill_vaccination
 
 
+# Check whether we already have the data from MyGov for today.
+# We start fetching at 8AM.
+
+latest = Path("../saarani/latest.json")
+
+today = pendulum.now("Asia/Kolkata")
+if today.hour < 8:
+    today = today.subtract(days=1)
+
+with open(latest) as f:
+    latest_cases = json.load(f)["timestamp"]["cases"]
+    latest_fetched = pendulum.from_timestamp(latest_cases["last_fetched_unix"],
+                                             tz="Asia/Kolkata")
+    if (
+        latest_cases["primary_source"] == "mygov"
+        and today.date() == latest_fetched.date()
+    ):
+        print("Data already fetched for today, exiting.")
+        exit(0)
+
+
 pretty = {}  # Formatted dict containing all data for a state.
 pretty["timestamp"] = {}  # For storing timestamps of data.
 
@@ -178,7 +199,6 @@ Path(f"../saarani/Daily/{yesterday.format('YYYY_MM_DD')}.json").write_text(
     json.dumps(pretty, indent=4)
 )
 
-latest = Path("../saarani/latest.json")
 latest.unlink(missing_ok=True)
 latest.symlink_to(Path(f"./Daily/{yesterday.format('YYYY_MM_DD')}.json"))
 
